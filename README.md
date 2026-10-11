@@ -1,21 +1,65 @@
 # Study Companion
 
-A MERN study assistant that turns PDF notes into searchable
-documents, practice quizzes, and personalized concept review.
+A MERN study assistant that turns PDF notes into searchable documents,
+AI-generated practice quizzes, and personalized concept review.
+
+[Live Demo](https://study-companion-9o1u.onrender.com) ·
+[GitHub Repository](https://github.com/konthamvivek095-ux/study-companion)
+
+## Overview
+
+Study Companion helps students ask questions about their study material,
+practice with quizzes, and identify concepts that need another look.
+
+Answers and quiz explanations include supporting document passages
+and page numbers so users can check the source material.
 
 ## Features
 
-- Account registration and login with persistent sessions.
-- PDF upload and page-aware text extraction.
-- Semantic search using Gemini embeddings.
-- Document-grounded AI answers with source passages and page numbers.
-- AI-generated multiple-choice quizzes.
-- Server-side scoring with explanations and citations.
-- Saved practice history.
-- Misconception Detective for identifying concepts to revisit.
-- Responsive interface with a minimal design.
+### Authentication
+- Account registration and login.
+- Password hashing using bcryptjs.
+- Persistent sessions stored in MongoDB.
+- Logout and authenticated API access.
+- Ownership checks for documents and quizzes.
 
-## Tech Stack
+### Document Library
+- Upload text-based PDFs.
+- Extract text while preserving page numbers.
+- Store document metadata and extracted text in MongoDB.
+- View uploaded documents and extracted passages.
+
+### Document Questions
+- Prepare documents for semantic search.
+- Create normalized, 768-dimensional Gemini embeddings.
+- Retrieve relevant passages using cosine similarity.
+- Generate answers grounded in retrieved passages.
+- Display supporting passages and page numbers.
+- Return a refusal response when the model determines that the
+  retrieved passages cannot support an answer.
+
+### Practice Quizzes
+- Generate up to five multiple-choice questions from document passages.
+- Provide four options per question.
+- Keep the answer key on the server until submission.
+- Grade answers on the server.
+- Display scores, explanations, and supporting passages.
+- Save quiz attempts for practice history.
+
+### Misconception Detective
+- Identify concepts associated with incorrect answers.
+- Flag repeated mistakes across different questions.
+- Use the latest submitted answer to each question.
+- Update concept review after quiz submissions.
+
+### Interface
+- Responsive React interface.
+- Minimal color palette.
+- Loading, error, and empty states.
+- Expandable source passages.
+- Recent practice history.
+
+## Technology Stack
 
 | Layer | Technologies |
 | --- | --- |
@@ -24,67 +68,170 @@ documents, practice quizzes, and personalized concept review.
 | Database | MongoDB Atlas, Mongoose |
 | Authentication | bcryptjs, express-session, connect-mongo |
 | PDF Processing | Multer, pdf-parse |
-| AI | Gemini API, @google/genai |
-| Search | Embeddings and cosine similarity |
-| Hosting | Render |
+| AI Generation | Gemini API, @google/genai |
+| Semantic Retrieval | Gemini embeddings, cosine similarity |
+| Deployment | Render |
+| Version Control | Git, GitHub |
 
-## How It Works
+## Architecture
 
-### Document Questions
+```text
+React interface
+      |
+      | Session-authenticated API requests
+      v
+Express backend
+      |
+      +-- MongoDB Atlas
+      |     Users, sessions, documents, embeddings,
+      |     quizzes, and quiz attempts
+      |
+      +-- PDF extraction and passage creation
+      |
+      +-- Gemini API
+            Document and question embeddings
+            Answer generation
+            Quiz generation
+```
 
-Uploaded PDFs are split into overlapping, page-aware passages.
-The backend creates normalized 768-dimensional embeddings and
-stores them in MongoDB.
+In local development, Vite forwards `/api` requests to Express.
 
-When a user asks a question, the backend embeds the question and
-ranks the document passages using cosine similarity in Node.js.
-Gemini receives the six highest-ranked passages and is instructed
-to answer using only their content.
+In production, Express serves the React build and API from the same
+origin.
 
-Answers include supporting passages for the user to inspect.
-AI answers can still contain mistakes.
+## How Document Q&A Works
 
-### Practice Quizzes
+1. A user uploads a text-based PDF.
+2. The backend extracts text and preserves page numbers.
+3. Text is split into passages of up to 1,200 characters, with
+   200-character overlap.
+4. Clicking **Prepare search** creates document embeddings.
+5. Embeddings are normalized and stored in MongoDB.
+6. A question is embedded using the retrieval-query task.
+7. The backend ranks passages from the selected document by cosine
+   similarity.
+8. The six highest-ranked passages are sent to Gemini.
+9. The backend validates the response structure and citation IDs.
+10. The frontend displays the answer and supporting passages.
 
-Gemini generates up to five multiple-choice questions from
-passages sampled across the selected document.
+Similarity ranking currently runs in Node.js. MongoDB stores the
+embeddings; Atlas Vector Search is a future improvement.
 
-Correct answers remain on the server until submission.
-The backend grades the answers and saves the attempt.
+The model is instructed to use only the supplied passages and to treat
+document content as data rather than instructions. These measures
+reduce unsupported answers but do not guarantee factual accuracy.
+Users should inspect the citations.
 
-### Misconception Detective
+## How Quiz Generation Works
 
-The tracker reviews the latest 100 saved attempts and uses only
-the latest answer to each question.
+1. The user selects an uploaded document.
+2. The backend samples up to 12 passages spread across the document.
+3. Gemini generates between one and five questions.
+4. The backend validates question structure and source IDs.
+5. Questions, answers, explanations, and citations are saved.
+6. The browser receives questions and options without the answer key.
+7. Submitted choices are graded against the stored answers.
+8. Results and the attempt are saved.
 
-A concept is flagged for repeated mistakes when at least two
-different questions with the same normalized concept label have
-incorrect latest answers in the same document.
+Quiz submission does not require another Gemini generation request.
 
-This is a rule-based signal to review a topic. Concept labels
-with different wording remain separate.
+Because generation uses sampled passages, a quiz may not cover every
+topic in a long document.
 
-## Run Locally
+## How Misconception Detective Works
+
+The tracker analyzes the latest 100 saved attempts.
+
+For each question, only its latest submitted answer counts. Repeated
+submissions of the same question do not count as different questions.
+
+Concept labels are grouped within the same document after normalizing
+capitalization, Unicode representation, and spacing.
+
+A concept is flagged for repeated mistakes when at least two different
+questions under that label have incorrect latest answers.
+
+Correcting a question on a retry can remove its mistake from the review.
+
+This feature is a rule-based signal to revisit a concept. It does not
+diagnose a specific misunderstanding. Labels with different wording
+remain separate.
+
+## Project Structure
+
+```text
+study-companion/
+├── client/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── AskNotes.jsx
+│   │   │   ├── ConceptReview.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── DocumentLibrary.jsx
+│   │   │   ├── IndexDocumentButton.jsx
+│   │   │   ├── LoginForm.jsx
+│   │   │   ├── PracticeHistory.jsx
+│   │   │   ├── QuizPractice.jsx
+│   │   │   └── SignupForm.jsx
+│   │   ├── App.jsx
+│   │   ├── App.css
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── package.json
+│   └── vite.config.js
+├── server/
+│   ├── middleware/
+│   │   └── requireAuth.js
+│   ├── models/
+│   │   ├── Chunk.js
+│   │   ├── Document.js
+│   │   ├── Quiz.js
+│   │   ├── QuizAttempt.js
+│   │   └── User.js
+│   ├── routes/
+│   │   ├── auth.js
+│   │   ├── documents.js
+│   │   ├── indexing.js
+│   │   ├── questions.js
+│   │   └── quizzes.js
+│   ├── utils/
+│   │   ├── buildConceptReview.js
+│   │   ├── chunkPages.js
+│   │   ├── createEmbeddings.js
+│   │   └── semanticRetrieveChunks.js
+│   ├── index.js
+│   └── package.json
+├── .gitignore
+└── README.md
+```
+
+## Local Setup
 
 ### Requirements
 
 - Node.js 24 and npm.
-- MongoDB Atlas connection string.
-- Gemini API key.
-- Your local IP allowed in MongoDB Atlas.
+- A MongoDB Atlas database and database user.
+- Your local IP allowed in the Atlas project IP access list.
+- A Gemini API key with access to the configured models.
 
-### Install
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/konthamvivek095-ux/study-companion.git
 cd study-companion
+```
+
+### 2. Install Dependencies
+
+```bash
 npm ci --prefix server
 npm ci --prefix client --include=dev
 ```
 
-### Environment Variables
+### 3. Configure Environment Variables
 
-Create `server/.env` and fill in these values:
+Create `server/.env`:
 
 ```dotenv
 PORT=5001
@@ -95,46 +242,132 @@ GEMINI_MODEL=gemini-3.8-flash
 GEMINI_EMBEDDING_MODEL=gemini-embedding-001
 ```
 
-Use models available to your Google project.
+Replace the placeholder credentials. Use model names available to your
+Google project.
 
-Generate a session secret with:
+Generate a session secret:
 
 ```bash
 node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
 ```
 
-Do not commit your populated `.env` file.
+Copy the generated value into `SESSION_SECRET`.
 
-### Start the App
+Never commit the populated `.env` file.
 
-From the project root, start the backend:
+### 4. Start the Backend
+
+From the project root:
 
 ```bash
 npm run dev --prefix server
 ```
 
-In a second terminal, start the frontend:
+The default backend address is:
+
+```text
+http://localhost:5001
+```
+
+Health endpoint:
+
+```text
+http://localhost:5001/api/health
+```
+
+### 5. Start the Frontend
+
+Open another terminal in the project root:
 
 ```bash
 npm run dev --prefix client
 ```
 
-Open the frontend URL printed by Vite, usually
-http://localhost:5173.
+Open the URL printed by Vite, usually:
 
-## Code Checks
+```text
+http://localhost:5173
+```
+
+## Using the App
+
+1. Register an account and log in.
+2. Upload a text-based PDF.
+3. Click **Prepare search** for that document.
+4. Select it in **Ask your notes** and enter a question.
+5. Expand citations to inspect supporting passages.
+6. Select a document in **Practice with your notes**.
+7. Generate a quiz and answer every question.
+8. Submit answers and review the explanations.
+9. Check practice history and concepts to revisit.
+
+After uploading a document, use **Refresh list** in the question or quiz
+section if it does not appear immediately.
+
+## API Endpoints
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| GET | `/api/health` | Backend and database status |
+| POST | `/api/auth/register` | Register an account |
+| POST | `/api/auth/login` | Log in |
+| GET | `/api/auth/me` | Get the current user |
+| POST | `/api/auth/logout` | Log out |
+| POST | `/api/documents` | Upload a PDF |
+| GET | `/api/documents` | List the user's documents |
+| GET | `/api/documents/:documentId/chunks` | Get document passages |
+| POST | `/api/documents/:documentId/index` | Prepare semantic search |
+| POST | `/api/questions` | Ask a document question |
+| POST | `/api/quizzes` | Generate a quiz |
+| POST | `/api/quizzes/:quizId/submit` | Submit and grade answers |
+| GET | `/api/quizzes/attempts` | Get recent practice history |
+| GET | `/api/quizzes/concept-review` | Get concepts to revisit |
+
+Document, question, and quiz endpoints require authentication.
+Protected resources are checked against the logged-in user's ownership.
+
+## Checks and Validation
+
+Run frontend linting:
 
 ```bash
 npm run lint --prefix client
+```
+
+Build the frontend:
+
+```bash
 npm run build --prefix client
 ```
 
-## Deployment
+Manual checks performed during development include:
 
-The app runs as one Render Node web service.
-Express serves both the React production build and the API.
+- Registration, login, session refresh, and logout.
+- PDF upload and text extraction.
+- Embedding creation and reuse during repeated indexing.
+- Supported answers with citations.
+- Refusal for questions unsupported by retrieved passages.
+- Quiz generation, submission, and scoring.
+- Practice history and concept review display.
+- Another account receiving 404 for a user's document.
+- Another account receiving 404 when submitting a user's quiz.
+- Logged-out access to practice history receiving 401.
 
-Leave Root Directory empty.
+These manual checks do not replace an automated test suite or measure
+overall AI accuracy.
+
+## Deployment on Render
+
+The app runs as one Node web service.
+
+### Service Configuration
+
+| Setting | Value |
+| --- | --- |
+| Branch | `main` |
+| Root Directory | Leave empty |
+| Runtime | Node |
+| Health Check Path | `/api/health` |
 
 Build command:
 
@@ -148,32 +381,52 @@ Start command:
 npm start --prefix server
 ```
 
-Configure the environment variables in Render, including
-`NODE_ENV=production`, and allow the service's outbound IP
-ranges in MongoDB Atlas.
+### Environment Variables
+
+Configure these in Render:
+
+```text
+NODE_ENV=production
+NODE_VERSION=24.21.0
+MONGODB_URI=<your MongoDB connection string>
+SESSION_SECRET=<your production session secret>
+GEMINI_API_KEY=<your Gemini API key>
+GEMINI_MODEL=<your supported generation model>
+GEMINI_EMBEDDING_MODEL=gemini-embedding-001
+```
+
+Allow every outbound IP range listed for the Render service in the
+MongoDB Atlas project IP access list.
 
 ## Limitations
 
-- PDF uploads are limited to 5 MB and 100 pages.
-- Scanned PDFs are not supported without OCR.
+- Uploads are limited to 5 MB and 100 pages.
+- Scanned PDFs require OCR, which is not implemented.
 - Search indexing supports at most 200 passages per document.
-- Search operates on one selected document at a time.
-- AI features depend on available Gemini quota.
-- Quizzes sample document passages and may not cover every topic.
+- Retrieval searches one selected document at a time.
+- Gemini quotas can temporarily prevent answers and quiz generation.
+- Quiz generation samples passages and may not cover every topic.
+- AI-generated content can contain mistakes.
 - Practice history displays the latest 20 attempts.
-- AI-generated answers and quizzes should be checked against sources.
+- Concept review analyzes the latest 100 attempts.
+- Concept labels with different wording are not merged.
+- Render's Free instance can delay the first request after inactivity.
 
 ## Future Improvements
 
-- OCR for scanned PDFs.
-- Search across multiple documents.
-- Atlas Vector Search for larger document collections.
-- Consistent concept labels across quizzes.
-- Targeted quizzes for concepts with repeated mistakes.
-- Automated API tests and retrieval-quality evaluation.
+- OCR for scanned study material.
+- Semantic search across multiple documents.
+- MongoDB Atlas Vector Search for larger collections.
+- Consistent concept labels across generated quizzes.
+- Targeted practice for flagged concepts.
+- Automated API and authorization tests.
+- Retrieval-quality and answer-grounding evaluation.
+- Pagination for document and practice history lists.
 
 ## Author
 
-Kontham Vivek
+**Kontham Vivek**
 
-GitHub: https://github.com/konthamvivek095-ux
+- [GitHub](https://github.com/konthamvivek095-ux)
+- [Project Repository](https://github.com/konthamvivek095-ux/study-companion)
+- [Live Demo](https://study-companion-9o1u.onrender.com)
