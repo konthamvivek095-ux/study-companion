@@ -1,0 +1,49 @@
+.index-control {
+  width: 200px;
+  max-width: 100%;
+  margin-left: auto;
+}
+
+.index-button {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #c7d6ca;
+  border-radius: 7px;
+  background: #edf2eb;
+  color: var(--accent);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.index-button:hover:not(:disabled) {
+  background: #dfece3;
+}
+
+.index-button:disabled {
+  cursor: default;
+}
+
+.index-message {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.index-message-error {
+  color: #854c38;
+}
+
+.index-message-ready {
+  color: var(--accent);
+}
+
+@media (max-width: 600px) {
+  .index-control {
+    width: 100%;
+    margin-left: 0;
+  }
+}

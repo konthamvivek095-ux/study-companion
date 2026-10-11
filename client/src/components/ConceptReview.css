@@ -1,0 +1,173 @@
+.concept-section {
+  padding: 36px 0 56px;
+  border-top: 1px solid var(--border);
+  scroll-margin-top: 24px;
+}
+
+.concept-refresh {
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.concept-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.concept-description {
+  max-width: 650px;
+  margin: 0 0 24px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.concept-helper {
+  margin: 16px 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.concept-error {
+  color: #854c38;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.concept-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.concept-stats > div {
+  display: grid;
+  gap: 10px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.concept-stats strong {
+  color: var(--accent);
+  font-size: 30px;
+}
+
+.concept-stats span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.concept-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.concept-card,
+.concept-empty {
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.concept-badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.concept-repeated {
+  background: #f5eee7;
+  color: #854c38;
+}
+
+.concept-single {
+  background: #edf4ef;
+  color: var(--accent);
+}
+
+.concept-card h3 {
+  margin: 18px 0 8px;
+  font-size: 19px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.concept-document {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.concept-count {
+  margin: 20px 0;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.concept-suggestion {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+}
+
+.concept-suggestion span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.concept-suggestion p {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.concept-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.concept-empty h3 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.concept-empty p {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+@media (max-width: 700px) {
+  .concept-grid,
+  .concept-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .concept-card,
+  .concept-empty {
+    padding: 22px;
+  }
+}

@@ -1,0 +1,156 @@
+.signup-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+  margin-bottom: 60px;
+  padding: 48px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  scroll-margin-top: 24px;
+}
+
+.signup-introduction h2 {
+  max-width: 340px;
+  margin: 0 0 20px;
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 550;
+  line-height: 1.15;
+  letter-spacing: -1.3px;
+}
+
+.signup-introduction > p:not(.eyebrow) {
+  max-width: 320px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.signup-note {
+  display: block;
+  margin-top: 32px;
+  padding-left: 14px;
+  border-left: 2px solid var(--accent);
+  color: var(--accent);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.signup-form {
+  min-width: 0;
+}
+
+.signup-form h3 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+
+.signup-description {
+  margin: 0 0 28px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.signup-form fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.form-field {
+  margin-bottom: 20px;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.form-field input {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--background);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+}
+
+.form-field input::placeholder {
+  color: var(--muted);
+}
+
+.form-field input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.field-help {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.signup-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 7px;
+  background: var(--accent);
+  color: white;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.signup-button:hover:not(:disabled) {
+  background: #285246;
+}
+
+.signup-form fieldset:disabled {
+  opacity: 0.7;
+}
+
+.signup-button:disabled {
+  cursor: wait;
+}
+
+.form-feedback {
+  min-height: 36px;
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.feedback-loading {
+  color: var(--muted);
+}
+
+.feedback-success {
+  color: var(--accent);
+}
+
+.feedback-error {
+  color: #854c38;
+}
+
+@media (max-width: 800px) {
+  .signup-panel {
+    grid-template-columns: 1fr;
+    gap: 36px;
+    padding: 28px;
+  }
+}
